@@ -1,1 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>⚽ Futbol Analiz</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff; min-height: 100vh; margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .container {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 40px; max-width: 500px;
+            width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        h1 { text-align: center; font-size: 2.2em; margin: 0 0 10px 0; }
+        h1 span { color: #4CAF50; }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 25px; font-size: 0.9em; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: #ddd; font-size: 0.95em; }
+        select {
+            width: 100%; padding: 12px 15px; border: none; border-radius: 10px;
+            background: rgba(255,255,255,0.15); color: #fff; font-size: 1em;
+            cursor: pointer;
+        }
+        select:focus { outline: none; box-shadow: 0 0 0 2px #4CAF50; }
+        select option { background: #1a1a2e; color: #fff; }
+        button {
+            width: 100%; padding: 14px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: #fff; font-size: 1.15em; font-weight: bold;
+            cursor: pointer; margin-top: 10px;
+        }
+        button:hover { transform: scale(1.02); }
+        .footer { text-align: center; color: #666; font-size: 0.8em; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚽ <span>Futbol</span>Analiz</h1>
+        <p class="subtitle">Lig ve takımları seç, detaylı analiz yap</p>
 
+        <form method="POST" action="/analiz" id="analizForm">
+            <div class="form-group">
+                <label>🏆 Lig</label>
+                <select name="lig" id="ligSec" required>
+                    <option value="">-- Lig Seç --</option>
+                    {% for lig in ligler %}
+                    <option value="{{ lig }}">{{ lig }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>🏠 Ev Sahibi</label>
+                <select name="ev" id="evSec" required disabled>
+                    <option value="">-- Önce lig seç --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>🚗 Deplasman</label>
+                <select name="dep" id="depSec" required disabled>
+                    <option value="">-- Önce lig seç --</option>
+                </select>
+            </div>
+
+            <button type="submit">🔮 Analiz Et</button>
+        </form>
+
+        <div class="footer">
+            💡 Supabase Veritabanı Entegreli Profesyonel Analiz Sistemi
+        </div>
+    </div>
+
+    <script>
+        const ligSec = document.getElementById('ligSec');
+        const evSec = document.getElementById('evSec');
+        const depSec = document.getElementById('depSec');
+
+        ligSec.addEventListener('change', function() {
+            const lig = this.value;
+            if (!lig) {
+                evSec.disabled = true;
+                depSec.disabled = true;
+                evSec.innerHTML = '<option value="">-- Önce lig seç --</option>';
+                depSec.innerHTML = '<option value="">-- Önce lig seç --</option>';
+                return;
+            }
+
+            fetch(`/api/takimlar/${encodeURIComponent(lig)}`)
+                .then(r => r.json())
+                .then(data => {
+                    const options = '<option value="">-- Takım Seç --</option>' +
+                        data.takimlar.map(t => `<option value="${t}">${t}</option>`).join('');
+                    evSec.innerHTML = options;
+                    depSec.innerHTML = options;
+                    evSec.disabled = false;
+                    depSec.disabled = false;
+                });
+        });
+
+        document.getElementById('analizForm').addEventListener('submit', function(e) {
+            if (evSec.value === depSec.value) {
+                e.preventDefault();
+                alert('Aynı takımı seçemezsin!');
+            }
+        });
+    </script>
+</body>
+</html>
