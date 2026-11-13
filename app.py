@@ -11,11 +11,9 @@ def home():
     return """
     <div style="font-family: Arial; text-align: center; margin-top: 50px;">
         <h1>⚽ Futbol Analiz & Kupon Asistanı Aktif</h1>
-        <p>Supabase veritabanı ve maç karşılaştırma sistemi hazır.</p>
+        <p>Lig filtreli takım karşılaştırma sistemi hazır.</p>
         <hr style="width: 50%; margin: 20px auto;">
-        <a href="/karsilastir" style="font-size: 18px; padding: 12px 24px; background: #27ae60; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">🎯 Takım Karşılaştır & Kupon Fikri Al</a>
-        <br><br>
-        <a href="/analiz" style="font-size: 16px; color: #2c3e50; text-decoration: none;">Genel Lig Raporunu Gör (/analiz)</a>
+        <a href="/karsilastir" style="font-size: 18px; padding: 12px 24px; background: #27ae60; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">🎯 Lig Seç & Takımları Karşılaştır</a>
         <br><br>
         <a href="/sync" style="font-size: 14px; color: #3498db; text-decoration: none;">Verileri Şimdi Senkronize Et (/sync)</a>
     </div>
@@ -29,29 +27,6 @@ def sync():
     else:
         return {"durum": "hata", "mesaj": "Veriler işlenirken bir sorun oluştu."}, 500
 
-@app.route("/analiz")
-def analiz():
-    try:
-        supabase = get_supabase_client()
-        response = supabase.table("fb_takim_verileri").select("*").execute()
-        data = response.data
-        if not data:
-            return "<h1>Henüz veri yok. Lütfen /sync çalıştırın.</h1>"
-        df = pd.DataFrame(data)
-        top_gol = df.sort_values(by="gls", ascending=False)[["squad", "gls", "mp", "lig"]].head(10)
-        return f"""
-        <html>
-            <head><title>Genel Analiz</title></head>
-            <body style="font-family: Arial; margin: 30px;">
-                <a href="/">&larr; Ana Sayfa</a> | <a href="/karsilastir">Takım Karşılaştır & Kupon</a>
-                <h1>🏆 En Çok Gol Atan Takımlar</h1>
-                {top_gol.to_html(index=False, border=0, classes='table')}
-            </body>
-        </html>
-        """
-    except Exception as e:
-        return f"Hata: {e}"
-
 @app.route("/karsilastir", methods=["GET", "POST"])
 def karsilastir():
     try:
@@ -62,7 +37,13 @@ def karsilastir():
             return "<h1>Supabase'de veri bulunamadı. Önce /sync çalıştırın.</h1>"
             
         df = pd.DataFrame(data)
-        takimlar = sorted(df["squad"].unique().tolist())
+        ligler = sorted(df["lig"].dropna().unique().tolist())
+        
+        secilen_lig = request.form.get("lig", ligler[0] if ligler else "")
+        
+        # Seçilen lige ait takımları filtrele
+        df_lig = df[df["lig"] == secilen_lig] if secilen_lig else df
+        takimlar = sorted(df_lig["squad"].unique().tolist())
         
         sonuc_html = ""
         secilen_t1 = request.form.get("takim1", "")
@@ -72,7 +53,6 @@ def karsilastir():
             t1_row = df[df["squad"] == secilen_t1].iloc[0]
             t2_row = df[df["squad"] == secilen_t2].iloc[0]
             
-            # Basit Kupon ve Skor Analizi Mantığı
             t1_gol_ort = t1_row["gls"] / max(t1_row["mp"], 1)
             t2_gol_ort = t2_row["gls"] / max(t2_row["mp"], 1)
             toplam_beklenen_gol = t1_gol_ort + t2_gol_ort
@@ -97,13 +77,14 @@ def karsilastir():
             </div>
             """
 
-        options_html = "".join([f'<option value="{t}" {"selected" if t == secilen_t1 else ""}>{t}</option>' for t in takimlar])
-        options_html2 = "".join([f'<option value="{t}" {"selected" if t == secilen_t2 else ""}>{t}</option>' for t in takimlar])
+        lig_options = "".join([f'<option value="{l}" {"selected" if l == secilen_lig else ""}>{l}</option>' for l in ligler])
+        takim_options1 = "".join([f'<option value="{t}" {"selected" if t == secilen_t1 else ""}>{t}</option>' for t in takimlar])
+        takim_options2 = "".join([f'<option value="{t}" {"selected" if t == secilen_t2 else ""}>{t}</option>' for t in takimlar])
 
         html = f"""
         <html>
             <head>
-                <title>Takım Karşılaştırma & Kupon Fikri</title>
+                <title>Lig Filtreli Takım Karşılaştırma</title>
                 <style>
                     body {{ font-family: Arial, sans-serif; margin: 30px; background: #f9f9fb; color: #333; }}
                     .container {{ max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }}
@@ -118,13 +99,16 @@ def karsilastir():
             <body>
                 <div class="container">
                     <a href="/">&larr; Ana Sayfaya Dön</a>
-                    <h2>⚽ İki Takım Karşılaştırma ve Kupon Asistanı</h2>
+                    <h2>⚽ Lig Filtreli Takım Karşılaştırma & Kupon Asistanı</h2>
                     <form method="POST">
-                        <label><b>1. Takımı Seçin:</b></label>
-                        <select name="takim1">{options_html}</select>
+                        <label><b>1. Önce Lig Seçin:</b></label>
+                        <select name="lig" onchange="this.form.submit()">{lig_options}</select>
                         
-                        <label><b>2. Takımı Seçin:</b></label>
-                        <select name="takim2">{options_html2}</select>
+                        <label><b>2. Takım (1):</b></label>
+                        <select name="takim1">{takim_options1}</select>
+                        
+                        <label><b>3. Takım (2):</b></label>
+                        <select name="takim2">{takim_options2}</select>
                         
                         <button type="submit">Karşılaştır ve Kupon Fikri Ver</button>
                     </form>
