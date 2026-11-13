@@ -1,16 +1,13 @@
 name: Futbol Veri Otomasyonu
 
 on:
-  # Her Pazartesi saat 03:00'te otomatik çalışır (İstediğiniz zamanı değiştirebilirsiniz)
   schedule:
     - cron: '0 3 * * 1'
-  
-  # İsterseniz GitHub panelinden tek tıkla manuel de çalıştırabilirsiniz
   workflow_dispatch:
 
 jobs:
   run-scraper:
-  runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Repoyu Klonla
