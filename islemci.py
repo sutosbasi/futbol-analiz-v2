@@ -1,86 +1,81 @@
 import os
-import requests
+import cloudscraper
 import pandas as pd
-import numpy as np
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from supabase_client import get_supabase_client
 
 load_dotenv()
 
 def verileri_isle_ve_yukle():
-    print("[+] Ücretsiz Futbol API'sinden güncel veriler çekiliyor...")
+    print("[+] FBref'ten cloudscraper ile gerçek veriler kazınıyor...")
     
-      # Tamamen açık ve ücretsiz futbol verisi sağlayan uç nokta örneği
-    url = "https://raw.githubusercontent.com/openfootball/football.json/master/2025-26/en.1.json"
+    # Cloudflare engellerini aşmak için özel scraper oluşturuyoruz
+    scraper = cloudscraper.create_scraper()
+    
+    # Örnek olarak Premier League FBref istatistik sayfası
+    url = "https://fbref.com/en/comps/9/Premier-League-Stats"
     
     try:
-        response = requests.get(url)
+        response = scraper.get(url)
         if response.status_code != 200:
-            print(f"[!] API'ye erişilemedi. HTTP Kodu: {response.status_code}")
+            print(f"[!] FBref sayfasına erişilemedi. HTTP Kodu: {response.status_code}")
             return False
             
-        veri = response.json()
-        squad_isimleri = set()
+        # Sayfadaki tüm tabloları pandas ile çekelim
+        tables = pd.read_html(response.text, match="Regular season")
+        if not tables:
+            # Alternatif tablo arama
+            tables = pd.read_html(response.text)
+            
+        if not tables:
+            print("[!] Sayfada uygun tablo bulunamadı.")
+            return False
+            
+        df = tables[0]
         
-          # Gelen maç/fikstür verilerinden takım listesini ve özet istatistikleri derle
-        if "matches" in veri:
-            for match in veri["matches"]:
-                if "team1" in match: squad_isimleri.add(match["team1"])
-                if "team2" in match: squad_isimleri.add(match["team2"])
+        # Çok katmanlı sütun isimlerini düzeltme (MultiIndex kontrolü)
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.droplevel(0)
+            
+        print(f"[+] Başarıyla {len(df)} satır gerçek veri çekildi. Supabase'e işleniyor...")
         
-        if not squad_isimleri:
-            # Yedek statik veri havuzu (API yanıtı boş dönerse sistemin durmaması için)
-            takimlar_listesi = ["Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", "Crystal Palace", "Everton", "Fulham", "Liverpool", "Manchester City", "Manchester Utd", "Newcastle Utd", "Nottingham Forest", "Tottenham", "West Ham", "Wolves"]
-        else:
-            takimlar_listesi = list(squad_isimleri)
-
-          # DataFrame oluşturma ve standart sütunları doldurma
-        df_list = []
-        for takim in takimlar_listesi:
-            df_list.append({
-                "squad": takim,
+        # Sütun eşleme ve Supabase formatına hazırlama
+        # (FBref sütun adlarını veritabanı şemanızla eşleştiriyoruz)
+        kayitlar = []
+        for _, row in df.iterrows():
+            squad_name = str(row.get("Squad", row.get("Takım", "Bilinmeyen")))
+            if squad_name == "nan" or not squad_name:
+                continue
+                
+            kayitlar.append({
+                "squad": squad_name,
                 "sezon": "2025-2026",
                 "lig": "ENG-Premier League",
-                "mp": 10,
-                "stats_playing_time_90s": 10.0,
-                "gls": 15,
-                "ast": 12,
-                "possession": 50.0,
-                "crdy": 15,
-                "crdr": 1,
-                "sh": 120,
-                "sot": 45,
-                "pk": 2,
-                "pkatt": 2,
-                "keeper_ga": 10,
-                "sot_pct": 37.5,
-                "sh_per90": 12.0,
-                "sot_per90": 4.5,
-                "g_per_sh": 0.12,
-                "g_per_sot": 0.33,
-                "keeper_ga90": 1.0
+                "mp": int(row.get("MP", 0)) if pd.notnull(row.get("MP")) else 0,
+                "gls": int(row.get("Gls", 0)) if pd.notnull(row.get("Gls")) else 0,
+                "ast": int(row.get("Ast", 0)) if pd.notnull(row.get("Ast")) else 0,
+                "possession": float(row.get("Poss", 50.0)) if pd.notnull(row.get("Poss")) else 50.0,
+                "sh": int(row.get("Sh", 0)) if pd.notnull(row.get("Sh")) else 0,
+                "sot": int(row.get("SoT", 0)) if pd.notnull(row.get("SoT")) else 0,
             })
             
-        df = pd.DataFrame(df_list)
-        df = df.replace({np.nan: None, np.inf: None, -np.inf: None})
-
-        kayitlar = df.to_dict(orient="records")
-        print(f"[+] Toplam {len(kayitlar)} takım verisi Supabase'e gönderiliyor...")
+        if not kayitlar:
+            print("[!] İşlenecek geçerli kayıt bulunamadı.")
+            return False
 
         supabase = get_supabase_client()
-        batch_size = 500
         tablo_adi = "fb_takim_verileri"
+        
+        # Supabase'e upsert et
+        for item in kayitlar:
+            supabase.table(tablo_adi).upsert(item, on_conflict="squad,sezon,lig").execute()
 
-        for i in range(0, len(kayitlar), batch_size):
-            batch = kayitlar[i:i + batch_size]
-            cleaned_batch = [{k: (v if pd.notnull(v) else None) for k, v in row.items()} for row in batch]
-            supabase.table(tablo_adi).upsert(cleaned_batch, on_conflict="squad,sezon,lig").execute()
-
-        print("[OK] İşlem Başarılı: Tüm API verileri Supabase'e aktarıldı!")
+        print("[OK] Gerçek FBref verileri Supabase'e başarıyla aktarıldı!")
         return True
 
     except Exception as e:
-        print(f"[!] API Aktarım Hatası: {e}")
+        print(f"[!] FBref Kazıma Hatası: {e}")
         return False
 
 if __name__ == "__main__":

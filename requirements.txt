@@ -6,3 +6,5 @@ flask
 gunicorn
 numpy
 requests
+cloudscraper
+beautifulsoup4
