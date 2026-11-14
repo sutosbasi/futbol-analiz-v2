@@ -2,7 +2,13 @@ import os
 import re
 import pandas as pd
 import unicodedata
+from flask import Flask, request, render_template, jsonify
 from supabase import create_client
+
+# ============================================
+# FLASK UYGULAMA BAŞLATICI (Gunicorn'un aradığı 'app')
+# ============================================
+app = Flask(__name__)
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://wrclidclyqmysddmhpgk.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "sb_publishable_uBlT0hrxqHXNjGH-Gp0saA_2uM8Pq0I")
@@ -193,7 +199,7 @@ def _base_key(t):
         s = s.replace(c, '')
     s = s.lower()
     for tr, en in [('ı', 'i'), ('İ', 'i'), ('i̇', 'i'), ('ş', 's'), ('ğ', 'g'),
-                   ('ü', 'u'), ('ö', 'o'), ('ç', 'c')]:
+                    ('ü', 'u'), ('ö', 'o'), ('ç', 'c')]:
         s = s.replace(tr, en)
     s = ''.join(c for c in unicodedata.normalize('NFD', s)
                 if unicodedata.category(c) != 'Mn')
@@ -765,3 +771,36 @@ def analiz_et(ev_adi, dep_adi, lig):
         'btts': btts_tahmin
     }
     return sonuc
+
+
+# ============================================
+# FLASK ROTALARI
+# ============================================
+@app.route("/", methods=["GET"])
+def index():
+    ligler = sorted(list(LIG_TAKIMLARI.keys()))
+    return render_template("index.html", ligler=ligler)
+
+@app.route("/api/takimlar/<lig>", methods=["GET"])
+def api_takimlar(lig):
+    takimlar_listesi = LIG_TAKIMLARI.get(lig, [])
+    return jsonify({"takimlar": takimlar_listesi})
+
+@app.route("/analiz", methods=["POST"])
+def analiz_sayfasi():
+    lig = request.form.get("lig")
+    ev = request.form.get("ev")
+    dep = request.form.get("dep")
+    
+    if not lig or not ev or not dep or ev == dep:
+        return "<h1>Hata: Eksik veya aynı takımları seçtiniz.</h1><a href='/'>Geri Dön</a>"
+        
+    s = analiz_et(ev, dep, lig)
+    if not s:
+        return "<h1>Analiz verisi bulunamadı.</h1><a href='/'>Geri Dön</a>"
+        
+    return render_template("sonuc.html", s=s)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
