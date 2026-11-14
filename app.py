@@ -19,7 +19,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 GUNCEL_SEZON = "2026-2027"
 
 # ============================================
-# TAKIM ADI NORMALİZASYONU
+# TAKIM ADI NORMALİZASYONU (Genişletilmiş Versiyon)
 # ============================================
 ALIAS = {
     # === PREMIER LİG ===
@@ -52,11 +52,11 @@ ALIAS = {
     'luton town': 'Luton Town', 'luton': 'Luton Town',
     'watford': 'Watford', 'burnley': 'Burnley', 'southampton': 'Southampton',
 
-    # === LA LIGA ===
+    # === LA LIGA (Türkçe Çeviri Varyasyonları Dahil) ===
     'deportivo alaves': 'Alavés', 'alaves': 'Alavés',
     'athletic club bilbao': 'Athletic Club', 'athletic club': 'Athletic Club', 'athletic bilbao': 'Athletic Club',
     'atletico de madrid': 'Atlético Madrid', 'atletico madrid': 'Atlético Madrid',
-    'fc barcelona': 'Barcelona', 'barcelona': 'Barcelona',
+    'fc barcelona': 'Barcelona', 'barcelona': 'Barcelona', 'barselona': 'Barcelona',
     'celta de vigo': 'Celta Vigo', 'rc celta de vigo': 'Celta Vigo', 'rc celta': 'Celta Vigo', 'celta vigo': 'Celta Vigo',
     'dep. a coruna': 'Dep. A Coruña', 'deportivo la coruna': 'Dep. A Coruña', 'deportivo a coruna': 'Dep. A Coruña',
     'elche cf': 'Elche', 'elche': 'Elche',
@@ -123,7 +123,7 @@ ALIAS = {
 
     # === BUNDESLIGA ===
     'fc augsburg': 'Augsburg', 'augsburg': 'Augsburg',
-    'fc bayern munchen': 'Bayern Munich', 'bayern munchen': 'Bayern Munich', 'bayern munich': 'Bayern Munich',
+    'fc bayern munchen': 'Bayern Munich', 'bayern munchen': 'Bayern Munich', 'bayern munich': 'Bayern Munich', 'bayern münih': 'Bayern Munich',
     'borussia dortmund': 'Dortmund', 'dortmund': 'Dortmund',
     'sv elversberg': 'Elversberg', 'elversberg': 'Elversberg',
     'eintracht frankfurt': 'Frankfurt', 'frankfurt': 'Frankfurt',
@@ -186,7 +186,7 @@ ALIAS = {
 
 EXACT_ALIAS = {
     'fb': 'Fenerbahçe', 'gs': 'Galatasaray', 'bjk': 'Beşiktaş', 'ts': 'Trabzonspor',
-    'barca': 'Barcelona', 'hsv': 'Hamburger SV', 'bvb': 'Dortmund',
+    'barca': 'Barcelona', 'barselona': 'Barcelona', 'hsv': 'Hamburger SV', 'bvb': 'Dortmund',
 }
 
 SORTED_ALIAS_KEYS = sorted(ALIAS.keys(), key=len, reverse=True)
