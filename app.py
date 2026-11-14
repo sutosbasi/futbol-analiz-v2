@@ -1,5 +1,6 @@
 import os
 import re
+import io
 import pandas as pd
 import unicodedata
 from flask import Flask, request, render_template, jsonify
@@ -492,7 +493,6 @@ def genel_istatistikler(takim_key, sezon=None):
         if len(t_veriler) == 0:
             return empty_genel
 
-    # Bütün sezonların toplamı (sum) ve ortalaması (mean)
     toplam_mp = pd.to_numeric(t_veriler['MP'], errors='coerce').fillna(0).sum()
     toplam_gls = pd.to_numeric(t_veriler['Gls'], errors='coerce').fillna(0).sum()
     toplam_ast = pd.to_numeric(t_veriler['Ast'], errors='coerce').fillna(0).sum()
@@ -550,7 +550,6 @@ def ic_saha_performansi(takim_key, lig):
     if maclar.empty or '_key_home' not in maclar.columns:
         return _empty_saha()
 
-    # Sadece GUNCEL_SEZON (2026-2027) filtresi uygulanıyor
     m = maclar[
         match_team_key(maclar['_key_home'], takim_key) &
         (maclar['Sezon'] == GUNCEL_SEZON)
@@ -561,7 +560,6 @@ def ic_saha_performansi(takim_key, lig):
 
     if 'Date' in m.columns:
         m['Date'] = pd.to_datetime(m['Date'], errors='coerce')
-        # En yeniden en eskiye sıralama (Yakın tarihe doğru son 5 maç)
         m = m.sort_values('Date', ascending=False, na_position='last')
 
     m_son5 = m.head(5)
@@ -597,7 +595,6 @@ def dis_saha_performansi(takim_key, lig):
     if maclar.empty or '_key_away' not in maclar.columns:
         return _empty_saha()
 
-    # Sadece GUNCEL_SEZON (2026-2027) filtresi uygulanıyor
     m = maclar[
         match_team_key(maclar['_key_away'], takim_key) &
         (maclar['Sezon'] == GUNCEL_SEZON)
@@ -608,7 +605,6 @@ def dis_saha_performansi(takim_key, lig):
 
     if 'Date' in m.columns:
         m['Date'] = pd.to_datetime(m['Date'], errors='coerce')
-        # En yeniden en eskiye sıralama (Yakın tarihe doğru son 5 maç)
         m = m.sort_values('Date', ascending=False, na_position='last')
 
     m_son5 = m.head(5)
@@ -665,7 +661,7 @@ def analiz_et(ev_adi, dep_adi, lig):
         'veri_kaynagi': 'Supabase Veritabanı'
     }
 
-    # H2H (İkili Karşılaştırma) — En yakın tarihten en eskiye doğru sıralama
+    # H2H (İkili Karşılaştırma)
     h2h = pd.DataFrame()
     if not maclar.empty and {'_key_home', '_key_away'}.issubset(maclar.columns):
         h2h = maclar[
@@ -829,6 +825,53 @@ def analiz_sayfasi():
         return "<h1>Analiz verisi bulunamadı.</h1><a href='/'>Geri Dön</a>"
         
     return render_template("sonuc.html", s=s)
+
+@app.route("/veri-yukle", methods=["POST"])
+def veri_yukle():
+    if 'dosya' not in request.files:
+        return "<h1>Hata: Dosya seçilmedi.</h1><a href='/'>Geri Dön</a>"
+    
+    file = request.files['dosya']
+    if file.filename == '':
+        return "<h1>Hata: Dosya adı boş.</h1><a href='/'>Geri Dön</a>"
+        
+    try:
+        if file.filename.endswith('.xlsx') or file.filename.endswith('.xls'):
+            df_excel = pd.read_excel(file)
+            col_name = df_excel.columns[0]
+            data_rows = df_excel.iloc[:, 0].dropna().tolist()
+            all_text = col_name + "\n" + "\n".join(str(r) for r in data_rows if str(r).strip() != '')
+            df_clean = pd.read_csv(io.StringIO(all_text))
+        else:
+            df_clean = pd.read_csv(file)
+
+        df_clean = df_clean.dropna(subset=['Tarih', 'Puan', 'Ana Sayfa', 'Uzakta'])
+        scores = df_clean['Puan'].str.split('–', expand=True)
+        if scores.shape[1] < 2:
+            scores = df_clean['Puan'].str.split('-', expand=True)
+
+        df_clean['HomeGoals'] = pd.to_numeric(scores[0], errors='coerce')
+        df_clean['AwayGoals'] = pd.to_numeric(scores[1], errors='coerce')
+        df_clean = df_clean.dropna(subset=['HomeGoals', 'AwayGoals'])
+
+        eklenen = 0
+        for _, row in df_clean.iterrows():
+            kayit = {
+                'tarih': str(row['Tarih']).strip(),
+                'ev': str(row['Ana Sayfa']).strip(),
+                'dep': str(row['Uzakta']).strip(),
+                'ev_gol': int(row['HomeGoals']),
+                'dep_gol': int(row['AwayGoals']),
+                'sezon': '2026-2027',
+                'lig': 'Süper Lig'
+            }
+            supabase.table("fb_maclar").upsert(kayit).execute()
+            eklenen += 1
+
+        return f"<h1>✅ Başarılı! {eklenen} maç veritabanına işlendi.</h1><a href='/'>Ana Sayfaya Dön</a>"
+
+    except Exception as e:
+        return f"<h1>❌ Hata Oluştu: {e}</h1><a href='/'>Geri Dön</a>"
 
 
 if __name__ == "__main__":
