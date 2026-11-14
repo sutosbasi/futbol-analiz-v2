@@ -492,31 +492,49 @@ def genel_istatistikler(takim_key, sezon=None):
         if len(t_veriler) == 0:
             return empty_genel
 
-    toplamlar = {}
-    for col in ['mp', 'gls', 'ast', 'crdy', 'crdr', 'sh', 'sot', 'keeper_ga', 'pk', 'pkatt', 'g_a']:
-        if col in t_veriler.columns:
-            toplamlar[col] = pd.to_numeric(t_veriler[col], errors='coerce').fillna(0).sum()
-        else:
-            toplamlar[col] = 0
-    if 'possession' in t_veriler.columns:
-        toplamlar['possession'] = pd.to_numeric(t_veriler['possession'], errors='coerce').mean()
-    else:
-        toplamlar['possession'] = 0
+    # Bütün sezonların toplamı (sum) ve ortalaması (mean)
+    toplam_mp = pd.to_numeric(t_veriler['MP'], errors='coerce').fillna(0).sum()
+    toplam_gls = pd.to_numeric(t_veriler['Gls'], errors='coerce').fillna(0).sum()
+    toplam_ast = pd.to_numeric(t_veriler['Ast'], errors='coerce').fillna(0).sum()
+    toplam_crdy = pd.to_numeric(t_veriler['CrdY'], errors='coerce').fillna(0).sum()
+    toplam_crdr = pd.to_numeric(t_veriler['CrdR'], errors='coerce').fillna(0.0).sum()
+    toplam_ga = pd.to_numeric(t_veriler['Keeper_GA'], errors='coerce').fillna(0).sum()
+    toplam_sh = pd.to_numeric(t_veriler['Sh'], errors='coerce').fillna(0).sum()
+    toplam_sot = pd.to_numeric(t_veriler['SoT'], errors='coerce').fillna(0).sum()
+    
+    poss_col = 'Possession' if 'Possession' in t_veriler.columns else 'poss'
+    ort_poss = pd.to_numeric(t_veriler[poss_col], errors='coerce').mean() if poss_col in t_veriler.columns else 50.0
 
-    res = build_sezon_dict(toplamlar)
+    mp_valid = max(1.0, toplam_mp)
     sezonlar = sorted(t_veriler['Sezon'].dropna().unique()) if 'Sezon' in t_veriler.columns else []
-    res.update({
+
+    return {
+        'MP': int(toplam_mp), 'mp': int(toplam_mp),
+        'Gls': int(toplam_gls), 'gls': int(toplam_gls),
+        'Ast': int(toplam_ast), 'ast': int(toplam_ast),
+        'CrdY': int(toplam_crdy), 'crdy': int(toplam_crdy),
+        'CrdR': int(toplam_crdr), 'crdr': int(toplam_crdr),
+        'Keeper_GA': int(toplam_ga), 'keeper_ga': int(toplam_ga),
+        'Gls_pm': round(toplam_gls / mp_valid, 2),
+        'Sh': int(toplam_sh), 'sh': int(toplam_sh),
+        'SoT': int(toplam_sot), 'sot': int(toplam_sot),
+        'Sh_pm': round(toplam_sh / mp_valid, 2),
+        'SoT_pm': round(toplam_sot / mp_valid, 2),
+        'Keeper_GA_pm': round(toplam_ga / mp_valid, 2),
+        'SoT_pct': round((toplam_sot / toplam_sh * 100), 1) if toplam_sh > 0 else 0.0,
+        'G_per_Sh': round((toplam_gls / toplam_sh * 100), 2) if toplam_sh > 0 else 0.0,
+        'G_per_SoT': round((toplam_gls / toplam_sot * 100), 2) if toplam_sot > 0 else 0.0,
+        'Poss': round(ort_poss, 1),
         'sezon_sayisi': len(sezonlar),
         'sezonlar': sezonlar,
         'ilk_sezon': sezonlar[0] if sezonlar else '-',
         'son_sezon': sezonlar[-1] if sezonlar else '-',
-        'toplam_mp': res['MP'],
-        'toplam_gls': res['Gls'],
-        'toplam_sh': res['Sh'],
-        'toplam_sot': res['SoT'],
-        'toplam_ga': res['Keeper_GA']
-    })
-    return res
+        'toplam_mp': int(toplam_mp),
+        'toplam_gls': int(toplam_gls),
+        'toplam_sh': int(toplam_sh),
+        'toplam_sot': int(toplam_sot),
+        'toplam_ga': int(toplam_ga)
+    }
 
 
 def _empty_saha():
@@ -532,12 +550,18 @@ def ic_saha_performansi(takim_key, lig):
     if maclar.empty or '_key_home' not in maclar.columns:
         return _empty_saha()
 
-    m = maclar[match_team_key(maclar['_key_home'], takim_key)].copy()
+    # Sadece GUNCEL_SEZON (2026-2027) filtresi uygulanıyor
+    m = maclar[
+        match_team_key(maclar['_key_home'], takim_key) &
+        (maclar['Sezon'] == GUNCEL_SEZON)
+    ].copy()
+    
     if len(m) == 0:
         return _empty_saha()
 
     if 'Date' in m.columns:
         m['Date'] = pd.to_datetime(m['Date'], errors='coerce')
+        # En yeniden en eskiye sıralama (Yakın tarihe doğru son 5 maç)
         m = m.sort_values('Date', ascending=False, na_position='last')
 
     m_son5 = m.head(5)
@@ -573,12 +597,18 @@ def dis_saha_performansi(takim_key, lig):
     if maclar.empty or '_key_away' not in maclar.columns:
         return _empty_saha()
 
-    m = maclar[match_team_key(maclar['_key_away'], takim_key)].copy()
+    # Sadece GUNCEL_SEZON (2026-2027) filtresi uygulanıyor
+    m = maclar[
+        match_team_key(maclar['_key_away'], takim_key) &
+        (maclar['Sezon'] == GUNCEL_SEZON)
+    ].copy()
+    
     if len(m) == 0:
         return _empty_saha()
 
     if 'Date' in m.columns:
         m['Date'] = pd.to_datetime(m['Date'], errors='coerce')
+        # En yeniden en eskiye sıralama (Yakın tarihe doğru son 5 maç)
         m = m.sort_values('Date', ascending=False, na_position='last')
 
     m_son5 = m.head(5)
@@ -635,15 +665,16 @@ def analiz_et(ev_adi, dep_adi, lig):
         'veri_kaynagi': 'Supabase Veritabanı'
     }
 
-    # H2H — tüm sezonlar
+    # H2H (İkili Karşılaştırma) — En yakın tarihten en eskiye doğru sıralama
     h2h = pd.DataFrame()
     if not maclar.empty and {'_key_home', '_key_away'}.issubset(maclar.columns):
         h2h = maclar[
             ((maclar['_key_home'] == ev) & (maclar['_key_away'] == dep)) |
             ((maclar['_key_home'] == dep) & (maclar['_key_away'] == ev))
-        ]
+        ].copy()
         if 'Date' in h2h.columns:
-            h2h = h2h.sort_values('Date', ascending=False)
+            h2h['Date'] = pd.to_datetime(h2h['Date'], errors='coerce')
+            h2h = h2h.sort_values('Date', ascending=False, na_position='last')
         h2h = h2h.head(10)
 
     if len(h2h) > 0:
