@@ -6,7 +6,7 @@ from flask import Flask, request, render_template, jsonify
 from supabase import create_client
 
 # ============================================
-# FLASK UYGULAMA BAŞLATICI (Gunicorn'un aradığı 'app')
+# FLASK UYGULAMA BAŞLATICI (Gunicorn için)
 # ============================================
 app = Flask(__name__)
 
@@ -532,26 +532,25 @@ def ic_saha_performansi(takim_key, lig):
     if maclar.empty or '_key_home' not in maclar.columns:
         return _empty_saha()
 
-    m = maclar[
-        match_team_key(maclar['_key_home'], takim_key) &
-        (maclar['Lig'] == lig) &
-        (maclar['Sezon'] == GUNCEL_SEZON)
-    ].copy()
+    m = maclar[match_team_key(maclar['_key_home'], takim_key)].copy()
     if len(m) == 0:
         return _empty_saha()
 
     if 'Date' in m.columns:
-        m = m.sort_values('Date', ascending=False)
+        m['Date'] = pd.to_datetime(m['Date'], errors='coerce')
+        m = m.sort_values('Date', ascending=False, na_position='last')
 
-    son5 = [{
+    m_son5 = m.head(5)
+    n = len(m)
+
+    son5_liste = [{
         'tarih': r['Date'].strftime('%d.%m.%Y') if pd.notnull(r.get('Date')) else '',
         'rakim': r.get('Away_Display', r.get('Away', '')),
         'skor': f"{int(r['HomeGoals'])}-{int(r['AwayGoals'])}",
         'kazandi': bool(r['HomeGoals'] > r['AwayGoals']),
         'berabere': bool(r['HomeGoals'] == r['AwayGoals'])
-    } for _, r in m.head(5).iterrows()]
+    } for _, r in m_son5.iterrows()]
 
-    n = len(m)
     g = int((m['HomeGoals'] > m['AwayGoals']).sum())
     b = int((m['HomeGoals'] == m['AwayGoals']).sum())
     mag = int((m['HomeGoals'] < m['AwayGoals']).sum())
@@ -563,10 +562,10 @@ def ic_saha_performansi(takim_key, lig):
         'maglubiyet_yuzde': round((mag / n) * 100) if n > 0 else 0,
         'atilan_gol': int(m['HomeGoals'].sum()),
         'yenen_gol': int(m['AwayGoals'].sum()),
-        'gol_pm': round(m['HomeGoals'].mean(), 2),
-        'yenen_gol_pm': round(m['AwayGoals'].mean(), 2),
-        'toplam_gol_pm': round((m['HomeGoals'] + m['AwayGoals']).mean(), 2),
-        'son5': son5
+        'gol_pm': round(m['HomeGoals'].mean(), 2) if n > 0 else 0.0,
+        'yenen_gol_pm': round(m['AwayGoals'].mean(), 2) if n > 0 else 0.0,
+        'toplam_gol_pm': round((m['HomeGoals'] + m['AwayGoals']).mean(), 2) if n > 0 else 0.0,
+        'son5': son5_liste
     }
 
 
@@ -574,26 +573,25 @@ def dis_saha_performansi(takim_key, lig):
     if maclar.empty or '_key_away' not in maclar.columns:
         return _empty_saha()
 
-    m = maclar[
-        match_team_key(maclar['_key_away'], takim_key) &
-        (maclar['Lig'] == lig) &
-        (maclar['Sezon'] == GUNCEL_SEZON)
-    ].copy()
+    m = maclar[match_team_key(maclar['_key_away'], takim_key)].copy()
     if len(m) == 0:
         return _empty_saha()
 
     if 'Date' in m.columns:
-        m = m.sort_values('Date', ascending=False)
+        m['Date'] = pd.to_datetime(m['Date'], errors='coerce')
+        m = m.sort_values('Date', ascending=False, na_position='last')
 
-    son5 = [{
+    m_son5 = m.head(5)
+    n = len(m)
+
+    son5_liste = [{
         'tarih': r['Date'].strftime('%d.%m.%Y') if pd.notnull(r.get('Date')) else '',
         'rakim': r.get('Home_Display', r.get('Home', '')),
         'skor': f"{int(r['HomeGoals'])}-{int(r['AwayGoals'])}",
         'kazandi': bool(r['AwayGoals'] > r['HomeGoals']),
         'berabere': bool(r['AwayGoals'] == r['HomeGoals'])
-    } for _, r in m.head(5).iterrows()]
+    } for _, r in m_son5.iterrows()]
 
-    n = len(m)
     g = int((m['AwayGoals'] > m['HomeGoals']).sum())
     b = int((m['AwayGoals'] == m['HomeGoals']).sum())
     mag = int((m['AwayGoals'] < m['HomeGoals']).sum())
@@ -605,10 +603,10 @@ def dis_saha_performansi(takim_key, lig):
         'maglubiyet_yuzde': round((mag / n) * 100) if n > 0 else 0,
         'atilan_gol': int(m['AwayGoals'].sum()),
         'yenen_gol': int(m['HomeGoals'].sum()),
-        'gol_pm': round(m['AwayGoals'].mean(), 2),
-        'yenen_gol_pm': round(m['HomeGoals'].mean(), 2),
-        'toplam_gol_pm': round((m['HomeGoals'] + m['AwayGoals']).mean(), 2),
-        'son5': son5
+        'gol_pm': round(m['AwayGoals'].mean(), 2) if n > 0 else 0.0,
+        'yenen_gol_pm': round(m['HomeGoals'].mean(), 2) if n > 0 else 0.0,
+        'toplam_gol_pm': round((m['HomeGoals'] + m['AwayGoals']).mean(), 2) if n > 0 else 0.0,
+        'son5': son5_liste
     }
 
 
