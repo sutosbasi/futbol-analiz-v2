@@ -9,62 +9,70 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            color: #fff; min-height: 100vh; margin: 0; padding: 20px;
+            color: #fff; min-height: 100vh; margin: 0; padding: 15px;
+            overflow-x: hidden;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; width: 100%; }
         .header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-wrap: wrap; gap: 10px;
         }
-        .header h1 { margin: 0; font-size: 1.6em; }
+        .header h1 { margin: 0; font-size: 1.5em; }
         .header h1 span { color: #4CAF50; }
         .back-btn {
-            background: rgba(255,255,255,0.1); color: #fff; padding: 10px 20px;
-            border-radius: 10px; text-decoration: none; transition: 0.3s;
+            background: rgba(255,255,255,0.1); color: #fff; padding: 8px 15px;
+            border-radius: 10px; text-decoration: none; transition: 0.3s; font-size: 0.9em;
         }
         .back-btn:hover { background: rgba(255,255,255,0.2); }
 
-        .match-title { text-align: center; font-size: 2em; margin: 20px 0 10px 0; }
-        .match-title .vs { color: #FF5722; margin: 0 15px; }
-        .lig-badge { text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 30px; font-size: 1.3em; letter-spacing: 0.5px; }
+        .match-title { text-align: center; font-size: 1.7em; margin: 20px 0 10px 0; word-break: break-word; }
+        .match-title .vs { color: #FF5722; margin: 0 10px; }
+        .lig-badge { text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 25px; font-size: 1.2em; letter-spacing: 0.5px; }
 
-        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .card {
-            background: rgba(255,255,255,0.08); border-radius: 15px; padding: 20px; text-align: center;
+            background: rgba(255,255,255,0.08); border-radius: 15px; padding: 15px; text-align: center;
             border: 1px solid rgba(255,255,255,0.05);
         }
-        .card .number { font-size: 2em; font-weight: bold; color: #4CAF50; }
+        .card .number { font-size: 1.8em; font-weight: bold; color: #4CAF50; }
         .card .number.orange { color: #FF9800; }
-        .card .label { color: #aaa; font-size: 0.85em; margin-top: 5px; }
+        .card .label { color: #aaa; font-size: 0.8em; margin-top: 5px; }
 
         .section {
-            background: rgba(255,255,255,0.05); border-radius: 15px; padding: 25px;
+            background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px 15px;
             margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
         }
         .section h2 {
-            margin-top: 0; color: #4CAF50; font-size: 1.2em;
+            margin-top: 0; color: #4CAF50; font-size: 1.1em;
             border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        th { color: #4CAF50; font-size: 0.9em; font-weight: bold; }
-        td { font-size: 0.95em; }
+        /* Tabloların mobilde taşmasını önleyen kaydırılabilir sarmalayıcı */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { color: #4CAF50; font-size: 0.85em; font-weight: bold; }
+        td { font-size: 0.9em; }
         .kazanan { color: #4CAF50; font-weight: bold; }
         tr:hover { background: rgba(255,255,255,0.03); }
 
         .tahmin-box {
             background: rgba(76, 175, 80, 0.15); border: 2px solid #4CAF50;
-            border-radius: 15px; padding: 25px; text-align: center; margin-bottom: 20px;
+            border-radius: 15px; padding: 20px 15px; text-align: center; margin-bottom: 20px;
         }
-        .tahmin-box h3 { color: #4CAF50; margin-top: 0; font-size: 1.1em; }
-        .tahmin-ana { font-size: 1.8em; margin: 15px 0; font-weight: bold; }
-        .tahmin-guven { font-size: 1.1em; color: #FFC107; }
+        .tahmin-box h3 { color: #4CAF50; margin-top: 0; font-size: 1em; }
+        .tahmin-ana { font-size: 1.6em; margin: 12px 0; font-weight: bold; word-break: break-word; }
+        .tahmin-guven { font-size: 1em; color: #FFC107; }
         
-        /* Bar ile Birebir Orantılı ve Renk Üzerine Oturan Etiket Yapısı */
         .bar-labels {
             display: flex;
-            font-size: 1.05em;
+            font-size: 0.95em;
             font-weight: bold;
             margin-top: 15px;
             margin-bottom: 6px;
@@ -74,25 +82,29 @@
         .bar-labels .label-dep { color: #FF5722; width: {{ s.tahmin.dep_o }}%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .olasilik-bar {
-            display: flex; height: 35px; border-radius: 15px; overflow: hidden;
-            margin: 0 0 15px 0; font-weight: bold; font-size: 0.9em;
+            display: flex; height: 32px; border-radius: 12px; overflow: hidden;
+            margin: 0 0 15px 0; font-weight: bold; font-size: 0.85em;
         }
         .olasilik-bar > div { display: flex; align-items: center; justify-content: center; }
 
-        .tahmin-ek { margin-top: 15px; font-size: 1em; }
+        .tahmin-ek { margin-top: 15px; font-size: 0.9em; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
         .tahmin-ek span {
             display: inline-block; background: rgba(76,175,80,0.2);
-            padding: 8px 15px; border-radius: 20px; margin: 5px;
+            padding: 6px 12px; border-radius: 20px;
         }
 
         .info-note {
             background: rgba(255, 193, 7, 0.1); border-left: 4px solid #FFC107;
-            padding: 12px 15px; border-radius: 8px; color: #FFC107; margin-bottom: 15px; font-size: 0.9em;
+            padding: 10px 12px; border-radius: 8px; color: #FFC107; margin-bottom: 15px; font-size: 0.85em;
         }
-        .saha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
-        .saha-box h3 { color: #4CAF50; font-size: 0.95em; margin: 0 0 10px 0; }
+        .saha-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        @media (min-width: 768px) {
+            .saha-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .saha-box h3 { color: #4CAF50; font-size: 0.9em; margin: 0 0 10px 0; }
         .saha-box.deplasman h3 { color: #FF9800; }
-        .footer { text-align: center; color: #666; margin-top: 30px; font-size: 0.85em; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        
+        .footer { text-align: center; color: #771; margin-top: 30px; font-size: 0.8em; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -113,7 +125,6 @@
             <div class="tahmin-ana">{{ s.tahmin.sonuc }}</div>
             <div class="tahmin-guven">📊 Güven: %{{ s.tahmin.guven }}</div>
 
-            <!-- Doğrudan yüzde genislikleriyle renklerin tam ortasına hizalanan etiketler -->
             <div class="bar-labels">
                 <span class="label-ev">🏠 {{ s.ev }}</span>
                 <span class="label-ber">⚖️ Beraberlik</span>
@@ -145,109 +156,121 @@
             </div>
         </div>
 
-        <!-- 2. İKİ TAKIM ARASINDAKİ GEÇMİŞ MAÇLAR (H2H) -->
+        <!-- 2. H2H -->
         {% if s.h2h %}
         <div class="section">
             <h2>⚔️ İki Takım Arasındaki Geçmiş Maç Skorları (H2H)</h2>
-            <table>
-                <thead>
-                    <tr><th>Tarih</th><th>Ev Sahibi</th><th>Skor</th><th>Deplasman</th><th>Sonuç</th></tr>
-                </thead>
-                <tbody>
-                    {% for m in s.h2h %}
-                    <tr>
-                        <td>{{ m.tarih }}</td>
-                        <td>{{ m.ev }}</td>
-                        <td><strong>{{ m.ev_gol }} - {{ m.dep_gol }}</strong></td>
-                        <td>{{ m.dep }}</td>
-                        <td>{{ m.sonuc }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Tarih</th><th>Ev Sahibi</th><th>Skor</th><th>Deplasman</th><th>Sonuç</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for m in s.h2h %}
+                        <tr>
+                            <td>{{ m.tarih }}</td>
+                            <td>{{ m.ev }}</td>
+                            <td><strong>{{ m.ev_gol }} - {{ m.dep_gol }}</strong></td>
+                            <td>{{ m.dep }}</td>
+                            <td>{{ m.sonuc }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% endif %}
 
-        <!-- 3. İKİ TAKIM KARŞILAŞTIRMASI (BU SEZON İSTATİSTİKLERİ & ŞUT/GOL ORANLARI) -->
+        <!-- 3. BU SEZON İSTATİSTİKLERİ -->
         {% if s.ev_sezon and s.dep_sezon %}
         <div class="section">
             <h2>📊 İki Takım Karşılaştırması ve Şut/Gol Verimliliği (Bu Sezon)</h2>
-            <table>
-                <thead>
-                    <tr><th>İstatistik Kalemi</th><th>🏠 {{ s.ev }}</th><th>🚗 {{ s.dep }}</th><th>Üstün Taraf</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Oynanan Maç</td><td>{{ s.ev_sezon.MP }}</td><td>{{ s.dep_sezon.MP }}</td><td>-</td></tr>
-                    <tr><td>Atılan Toplam Gol</td><td><strong>{{ s.ev_sezon.Gls }}</strong></td><td><strong>{{ s.dep_sezon.Gls }}</strong></td><td class="kazanan">{% if s.ev_sezon.Gls > s.dep_sezon.Gls %}{{ s.ev }}{% elif s.dep_sezon.Gls > s.ev_sezon.Gls %}{{ s.dep }}{% else %}Eşit{% endif %}</td></tr>
-                    <tr><td>Maç Başına Gol</td><td>{{ s.ev_sezon.Gls_pm }}</td><td>{{ s.dep_sezon.Gls_pm }}</td><td class="kazanan">{% if s.ev_sezon.Gls_pm > s.dep_sezon.Gls_pm %}{{ s.ev }}{% elif s.dep_sezon.Gls_pm > s.ev_sezon.Gls_pm %}{{ s.dep }}{% else %}Eşit{% endif %}</td></tr>
-                    <tr><td>Toplam Şut / Maç Başına Şut</td><td>{{ s.ev_sezon.Sh }} ({{ s.ev_sezon.Sh_pm }})</td><td>{{ s.dep_sezon.Sh }} ({{ s.dep_sezon.Sh_pm }})</td><td class="kazanan">{% if s.ev_sezon.Sh_pm > s.dep_sezon.Sh_pm %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
-                    <tr><td>İsabetli Şut / Maç Başına İsabet</td><td>{{ s.ev_sezon.SoT }} ({{ s.ev_sezon.SoT_pm }})</td><td>{{ s.dep_sezon.SoT }} ({{ s.dep_sezon.SoT_pm }})</td><td class="kazanan">{% if s.ev_sezon.SoT_pm > s.dep_sezon.SoT_pm %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
-                    <tr><td>Kaleyi Bulma Yüzdesi (İsabet %)</td><td>%{{ s.ev_sezon.SoT_pct }}</td><td>%{{ s.dep_sezon.SoT_pct }}</td><td class="kazanan">{% if s.ev_sezon.SoT_pct > s.dep_sezon.SoT_pct %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
-                    <tr><td>🎯 İsabetli Şutların Gole Dönüşme Oranı (%)</td><td><strong style="color: #4CAF50;">%{{ s.ev_sezon.G_per_SoT }}</strong></td><td><strong style="color: #FF9800;">%{{ s.dep_sezon.G_per_SoT }}</strong></td><td class="kazanan">{% if s.ev_sezon.G_per_SoT > s.dep_sezon.G_per_SoT %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
-                    <tr><td>Topa Sahip Olma %</td><td>%{{ s.ev_sezon.Poss }}</td><td>%{{ s.dep_sezon.Poss }}</td><td class="kazanan">{% if s.ev_sezon.Poss > s.dep_sezon.Poss %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>İstatistik Kalemi</th><th>🏠 {{ s.ev }}</th><th>🚗 {{ s.dep }}</th><th>Üstün Taraf</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Oynanan Maç</td><td>{{ s.ev_sezon.MP }}</td><td>{{ s.dep_sezon.MP }}</td><td>-</td></tr>
+                        <tr><td>Atılan Toplam Gol</td><td><strong>{{ s.ev_sezon.Gls }}</strong></td><td><strong>{{ s.dep_sezon.Gls }}</strong></td><td class="kazanan">{% if s.ev_sezon.Gls > s.dep_sezon.Gls %}{{ s.ev }}{% elif s.dep_sezon.Gls > s.ev_sezon.Gls %}{{ s.dep }}{% else %}Eşit{% endif %}</td></tr>
+                        <tr><td>Maç Başına Gol</td><td>{{ s.ev_sezon.Gls_pm }}</td><td>{{ s.dep_sezon.Gls_pm }}</td><td class="kazanan">{% if s.ev_sezon.Gls_pm > s.dep_sezon.Gls_pm %}{{ s.ev }}{% elif s.dep_sezon.Gls_pm > s.dep_sezon.Gls_pm %}{{ s.dep }}{% else %}Eşit{% endif %}</td></tr>
+                        <tr><td>Toplam Şut / Maç Başına Şut</td><td>{{ s.ev_sezon.Sh }} ({{ s.ev_sezon.Sh_pm }})</td><td>{{ s.dep_sezon.Sh }} ({{ s.dep_sezon.Sh_pm }})</td><td class="kazanan">{% if s.ev_sezon.Sh_pm > s.dep_sezon.Sh_pm %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
+                        <tr><td>İsabetli Şut / Maç Başına İsabet</td><td>{{ s.ev_sezon.SoT }} ({{ s.ev_sezon.SoT_pm }})</td><td>{{ s.dep_sezon.SoT }} ({{ s.dep_sezon.SoT_pm }})</td><td class="kazanan">{% if s.ev_sezon.SoT_pm > s.dep_sezon.SoT_pm %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
+                        <tr><td>Kaleyi Bulma Yüzdesi (İsabet %)</td><td>%{{ s.ev_sezon.SoT_pct }}</td><td>%{{ s.dep_sezon.SoT_pct }}</td><td class="kazanan">{% if s.ev_sezon.SoT_pct > s.dep_sezon.SoT_pct %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
+                        <tr><td>🎯 İsabetli Şutların Gole Dönüşme Oranı (%)</td><td><strong style="color: #4CAF50;">%{{ s.ev_sezon.G_per_SoT }}</strong></td><td><strong style="color: #FF9800;">%{{ s.dep_sezon.G_per_SoT }}</strong></td><td class="kazanan">{% if s.ev_sezon.G_per_SoT > s.dep_sezon.G_per_SoT %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
+                        <tr><td>Topa Sahip Olma %</td><td>%{{ s.ev_sezon.Poss }}</td><td>%{{ s.dep_sezon.Poss }}</td><td class="kazanan">{% if s.ev_sezon.Poss > s.dep_sezon.Poss %}{{ s.ev }}{% else %}{{ s.dep }}{% endif %}</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% endif %}
 
-        <!-- 4. İÇ SAHA / DIŞ SAHA PERFORMANSLARI -->
+        <!-- 4. İÇ SAHA / DIŞ SAHA -->
         {% if s.ev_ic_saha and s.dep_dis_saha %}
         <div class="section">
             <h2>🏟️ Ev Sahibi (İç Saha) & Deplasman Performansı</h2>
-            <table>
-                <thead>
-                    <tr><th>Kriter</th><th>🏠 {{ s.ev }} (İç Saha)</th><th>🚗 {{ s.dep }} (Dış Saha)</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Oynanan Maç</td><td>{{ s.ev_ic_saha.mac }}</td><td>{{ s.dep_dis_saha.mac }}</td></tr>
-                    <tr><td>Galibiyet</td><td>{{ s.ev_ic_saha.galibiyet }} (%{{ s.ev_ic_saha.galibiyet_yuzde }})</td><td>{{ s.dep_dis_saha.galibiyet }} (%{{ s.dep_dis_saha.galibiyet_yuzde }})</td></tr>
-                    <tr><td>Atılan Gol</td><td>{{ s.ev_ic_saha.atilan_gol }} ({{ s.ev_ic_saha.gol_pm }}/maç)</td><td>{{ s.dep_dis_saha.atilan_gol }} ({{ s.dep_dis_saha.gol_pm }}/maç)</td></tr>
-                    <tr><td>Yenen Gol</td><td>{{ s.ev_ic_saha.yenen_gol }}</td><td>{{ s.dep_dis_saha.yenen_gol }}</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Kriter</th><th>🏠 {{ s.ev }} (İç Saha)</th><th>🚗 {{ s.dep }} (Dış Saha)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Oynanan Maç</td><td>{{ s.ev_ic_saha.mac }}</td><td>{{ s.dep_dis_saha.mac }}</td></tr>
+                        <tr><td>Galibiyet</td><td>{{ s.ev_ic_saha.galibiyet }} (%{{ s.ev_ic_saha.galibiyet_yuzde }})</td><td>{{ s.dep_dis_saha.galibiyet }} (%{{ s.dep_dis_saha.galibiyet_yuzde }})</td></tr>
+                        <tr><td>Atılan Gol</td><td>{{ s.ev_ic_saha.atilan_gol }} ({{ s.ev_ic_saha.gol_pm }}/maç)</td><td>{{ s.dep_dis_saha.atilan_gol }} ({{ s.dep_dis_saha.gol_pm }}/maç)</td></tr>
+                        <tr><td>Yenen Gol</td><td>{{ s.ev_ic_saha.yenen_gol }}</td><td>{{ s.dep_dis_saha.yenen_gol }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
 
             <div class="saha-grid">
                 <div class="saha-box">
                     <h3>🏠 {{ s.ev }} - Son İç Saha Maçları</h3>
-                    <table>
-                        {% for m in s.ev_ic_saha.son5 %}
-                        <tr><td>{{ m.tarih }}</td><td>{{ m.rakim }}</td><td><strong>{{ m.skor }}</strong></td></tr>
-                        {% endfor %}
-                    </table>
+                    <div class="table-responsive">
+                        <table>
+                            {% for m in s.ev_ic_saha.son5 %}
+                            <tr><td>{{ m.tarih }}</td><td>{{ m.rakim }}</td><td><strong>{{ m.skor }}</strong></td></tr>
+                            {% endfor %}
+                        </table>
+                    </div>
                 </div>
                 <div class="saha-box deplasman">
                     <h3>🚗 {{ s.dep }} - Son Dış Saha Maçları</h3>
-                    <table>
-                        {% for m in s.dep_dis_saha.son5 %}
-                        <tr><td>{{ m.tarih }}</td><td>{{ m.rakim }}</td><td><strong>{{ m.skor }}</strong></td></tr>
-                        {% endfor %}
-                    </table>
+                    <div class="table-responsive">
+                        <table>
+                            {% for m in s.dep_dis_saha.son5 %}
+                            <tr><td>{{ m.tarih }}</td><td>{{ m.rakim }}</td><td><strong>{{ m.skor }}</strong></td></tr>
+                            {% endfor %}
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
         {% endif %}
 
-        <!-- 5. GENEL İSTATİSTİKLER (Çoklu Sezon) -->
+        <!-- 5. GENEL İSTATİSTİKLER -->
         {% if s.ev_genel and s.dep_genel %}
         <div class="section">
             <h2>📈 Genel İstatistikler (Son {{ s.ev_genel.sezon_sayisi }} Sezon)</h2>
             <div class="info-note">
                 📅 {{ s.ev_genel.ilk_sezon }} – {{ s.ev_genel.son_sezon }} arası toplu veriler
             </div>
-            <table>
-                <thead>
-                    <tr><th>Kriter</th><th>🏠 {{ s.ev }}</th><th>🚗 {{ s.dep }}</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Toplam Maç</td><td>{{ s.ev_genel.toplam_mp }}</td><td>{{ s.dep_genel.toplam_mp }}</td></tr>
-                    <tr><td>Toplam Gol</td><td>{{ s.ev_genel.toplam_gls }}</td><td>{{ s.dep_genel.toplam_gls }}</td></tr>
-                    <tr><td>Gol / Maç</td><td>{{ s.ev_genel.Gls_pm }}</td><td>{{ s.dep_genel.Gls_pm }}</td></tr>
-                    <tr><td>Şut / Maç</td><td>{{ s.ev_genel.Sh_pm }}</td><td>{{ s.dep_genel.Sh_pm }}</td></tr>
-                    <tr><td>İsabetli Şut %</td><td>%{{ s.ev_genel.SoT_pct }}</td><td>%{{ s.dep_genel.SoT_pct }}</td></tr>
-                    <tr><td>🎯 İsabetli Şut → Gol % (Genel)</td><td><strong>%{{ s.ev_genel.G_per_SoT }}</strong></td><td><strong>%{{ s.dep_genel.G_per_SoT }}</strong></td></tr>
-                    <tr><td>Topa Sahip Olma %</td><td>%{{ s.ev_genel.Poss }}</td><td>%{{ s.dep_genel.Poss }}</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Kriter</th><th>🏠 {{ s.ev }}</th><th>🚗 {{ s.dep }}</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Toplam Maç</td><td>{{ s.ev_genel.toplam_mp }}</td><td>{{ s.dep_genel.toplam_mp }}</td></tr>
+                        <tr><td>Toplam Gol</td><td>{{ s.ev_genel.toplam_gls }}</td><td>{{ s.dep_genel.toplam_gls }}</td></tr>
+                        <tr><td>Gol / Maç</td><td>{{ s.ev_genel.Gls_pm }}</td><td>{{ s.dep_genel.Gls_pm }}</td></tr>
+                        <tr><td>Şut / Maç</td><td>{{ s.ev_genel.Sh_pm }}</td><td>{{ s.dep_genel.Sh_pm }}</td></tr>
+                        <tr><td>İsabetli Şut %</td><td>%{{ s.ev_genel.SoT_pct }}</td><td>%{{ s.dep_genel.SoT_pct }}</td></tr>
+                        <tr><td>🎯 İsabetli Şut → Gol % (Genel)</td><td><strong>%{{ s.ev_genel.G_per_SoT }}</strong></td><td><strong>%{{ s.dep_genel.G_per_SoT }}</strong></td></tr>
+                        <tr><td>Topa Sahip Olma %</td><td>%{{ s.ev_genel.Poss }}</td><td>%{{ s.dep_genel.Poss }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% endif %}
 
